@@ -1,3 +1,0 @@
-lib = require('./db-access.js')
-
-console.log(lib)
