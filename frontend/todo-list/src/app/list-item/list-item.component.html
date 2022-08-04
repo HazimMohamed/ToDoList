@@ -1,6 +1,27 @@
-<div *ngIf="item">
-  {{item.createTime}}
-  <p>
-    {{item.content}}
-  </p>
-</div>
+<mat-card *ngIf="item" class="mat-card"
+          [ngClass]="hovered ?  'card-hovered' : 'card'"
+          (mouseenter)="mouseEnter()"
+          (mouseleave)="mouseLeave()">
+  <mat-card-subtitle>
+    {{getCreateTimeString()}}
+  </mat-card-subtitle>
+  <mat-card-content>
+    <div>
+      <mat-checkbox (change)="onCheckChange($event)">
+        <ng-container *ngIf="editable">
+          <div class="editable-content-container">
+            <mat-form-field>
+              <input [ngModel]="stagingInput">
+            </mat-form-field>
+            <button mat-button (click)="submitEdit()">
+              Save to-do.
+            </button>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="!editable">
+          {{item.content}}
+        </ng-container>
+      </mat-checkbox>
+    </div>
+  </mat-card-content>
+</mat-card>

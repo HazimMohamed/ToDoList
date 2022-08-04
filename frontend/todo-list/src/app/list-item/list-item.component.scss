@@ -1,0 +1,17 @@
+.mat-card {
+  max-width: 50rem;
+}
+
+.card {
+  background-color: lightblue;
+}
+
+.card-hovered {
+  background-color: lightgray;
+}
+
+.editable-content-container {
+  display: flex;
+  flex-direction: row;
+
+}

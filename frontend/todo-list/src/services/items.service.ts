@@ -1,27 +1,47 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
+import * as uuid from 'uuid';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ItemsService {
 
-  constructor() { }
+  constructor() {
+  }
+
+  items = [
+    new Item('This is my first comment.', new Date('2022-08-04T03:54:48+0000')),
+    new Item('Wow this is fun!', new Date('2022-08-04T03:54:48+0000'))
+  ];
+
+  deleteItem(items: string[]): Promise<void> {
+    return new Promise(resolve => {
+      this.items = this.items.filter(it => !items.includes(it.id));
+      resolve();
+    });
+  }
+
+  addItem(content: string) : Promise<void> {
+    return new Promise(resolve => {
+      this.items.push(new Item(content, new Date(Date.now())));
+      resolve();
+    });
+  }
 
   getAllItems(): Promise<Item[]> {
-    return Promise.resolve([
-      {
-        content: 'Hello world!',
-        createTime: 1231243134
-      },
-      {
-        content: 'This is my first todo list item',
-        createTime: 1231243134
-      }
-    ]);
+    return Promise.resolve(this.items);
   }
 }
 
-export interface Item {
+export class Item {
+  id: string;
   content: string;
-  createTime: number;
+  createTime: Date;
+
+
+  constructor(content: string, createTime: Date) {
+    this.id = uuid.v4()
+    this.content = content;
+    this.createTime = createTime;
+  }
 }
