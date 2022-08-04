@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Item, ItemsService } from '../services/items.service'
 
 @Component({
   selector: 'app-root',
@@ -6,5 +7,11 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'todo-list';
+  items: Item[] = [];
+
+  constructor(private itemsService: ItemsService) {}
+
+  ngOnInit() {
+    this.itemsService.getAllItems().then(items => this.items = items);
+  }
 }
