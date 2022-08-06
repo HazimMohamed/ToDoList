@@ -1,6 +1,7 @@
 *~
-backend/node_modules
 frontend/todo-list/node_modules
+backend/node_modules
+backend/bin/*
 .idea
 .DS_STORE
 .angular

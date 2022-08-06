@@ -28,7 +28,7 @@ export class ListItemComponent {
 
   hovered: boolean = false;
 
-  stagingControl: MatFormFieldControl<string> = new ;
+  stagedInput: string | undefined;
 
   getCreateTimeString(): string | undefined {
     if (this.item?.createTime) {
@@ -54,8 +54,8 @@ export class ListItemComponent {
   }
 
   submitEdit() {
-    if (this.stagingInput?.value != undefined) {
-      this.saved.emit(new Item(this.stagingInput.value, new Date(Date.now())));
+    if (this.stagedInput != undefined) {
+      this.saved.emit(new Item(this.stagedInput, new Date(Date.now())));
     }
   }
 }

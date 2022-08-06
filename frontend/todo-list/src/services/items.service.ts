@@ -1,12 +1,15 @@
 import {Injectable} from '@angular/core';
 import * as uuid from 'uuid';
+import {HttpClient, HttpClientModule} from '@angular/common/http';
+import {parseJson} from '@angular/cli/src/utilities/json-file';
+import {Observable} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ItemsService {
 
-  constructor() {
+  constructor(private http: HttpClient) {
   }
 
   items = [
@@ -29,9 +32,15 @@ export class ItemsService {
   }
 
   getAllItems(): Promise<Item[]> {
-    return Promise.resolve(this.items);
+    return new Promise<Item[]>((resolve) => {
+     let dataObservable: Observable<Item[]> = this.http.get<Item[]>('http://localhost:3000/todo', {
+       responseType: 'json'
+     });
+     dataObservable.subscribe(response => resolve(response) );
+    });
   }
 }
+
 
 export class Item {
   id: string;
