@@ -1,11 +1,16 @@
 import fs from 'fs';
 import { Item } from './data-types'
+import {MongoClient, WithId, Document, Collection} from 'mongodb';
+
 const TEST_DATA_PATH = './test-db/v1.json'
+const MONGO_URI = `mongodb+srv://todo-list-user:${process.env['MONGO_PASSWORD']}@startgazerv2.hojhz.mongodb.net`
 
 function shouldUseRealDatabase() : boolean {
 	let environmentFlag = process.env['CONNECT_TO_DB'];
 	return environmentFlag && environmentFlag.toLowerCase() === 'true';
 }
+
+
 
 function readTestData() : Promise<Item[]> {
 	return new Promise<Item[]>((resolve, reject) => {
@@ -35,16 +40,38 @@ function writeTestData(items: Item[]) : Promise<void> {
 	});
 }
 
+function connectToMongoDb(): Promise<Collection> {
+	const mongoClient = new MongoClient(MONGO_URI);
+	return mongoClient.connect().then((mongoClient) => {
+		return mongoClient.db('todo-list').collection('items');
+	});
+}
+
+let connection = shouldUseRealDatabase() ? connectToMongoDb() : undefined;
+
+function mongoDbRecordToItem(record: WithId<Document>): Item {
+	return {
+		id: record['id'],
+		content: record['content'],
+		createTime: undefined
+	}
+}
 
 function getAllItems(): Promise<Item[]> {
 		if (!shouldUseRealDatabase()) {
 			return readTestData();
 		}
+
+		return connection.then((collection) => {
+			return collection.find().toArray();
+		}).then((arrayOfResults) => {
+			return arrayOfResults.map((record) => mongoDbRecordToItem(record));
+		});
 }
 
 function addItem(item: Item): Promise<Item[]> {
 	if (!shouldUseRealDatabase()) {
-		return getAllItems()
+		return readTestData()
 				.then((items: Item[]) => {
 					items.push(item);
 					return writeTestData(items).then(() => {
@@ -52,6 +79,12 @@ function addItem(item: Item): Promise<Item[]> {
 					});
 				});
 	}
+
+	return connection.then((collection: Collection<Document>) => {
+		return collection.insertOne(item)
+	}).then(() => {
+		return getAllItems();
+	});
 }
 
 function removeItem(itemId: string): Promise<Item[]> {
@@ -63,6 +96,14 @@ function removeItem(itemId: string): Promise<Item[]> {
 			});
 		});
 	}
+
+	return connection.then((collection: Collection<Document>) => {
+		return collection.deleteOne({
+			'id': itemId
+		});
+	}).then(() => {
+		return getAllItems();
+	});
 }
 
 export { getAllItems, addItem, removeItem }
