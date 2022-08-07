@@ -13,7 +13,11 @@ app.use(cors())
 
 app.get('/todo', (req: Request, res: Response) => {
     itemsInterface.getAllItems().then(
-        (items: Item[]) => res.send(JSON.stringify(items))
+        (items: Item[]) => {
+            res.status(200);
+            res.setHeader('Content-Type', 'application/json');
+            res.send(JSON.stringify(items));
+        }
     ).catch((err: any) => {
         res.status(500);
         res.send(err);
@@ -48,6 +52,8 @@ app.post('/todo', (req: Request, res: Response) => {
 });
 
 app.delete('/todo', (req: Request, res: Response) => {
+    console.log(`Received delete request with payload: ${JSON.stringify(req.body)}`);
+
     try {
         validateDeleteRequestIsNotMalformed(req.body);
     } catch (e) {

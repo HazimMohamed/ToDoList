@@ -2,19 +2,19 @@ import { v4 as uuid } from 'uuid';
 import { Item } from '../src/data-types';
 
 let item1: Item = {
-  'id': uuid(),
+  'id': uuid().toString(),
   'content': 'Long live the king!',
   'createTime': undefined
 }
 
 let item2: Item = {
-  'id': uuid(),
+  'id': uuid().toString(),
   'content': 'The old king is dead.',
   'createTime': undefined
 }
 
 let item3: Item = {
-  'id': uuid(),
+  'id': uuid().toString(),
   'content': 'long live the new king!',
   'createTime': undefined
 }
