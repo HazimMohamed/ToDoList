@@ -1,6 +1,7 @@
 import 'jest';
 import { app } from '../src/test-server';
 import {item1, item2, item3} from './data';
+// @ts-ignore
 import supertest from 'supertest';
 import {Item} from '../src/data-types';
 
