@@ -67,6 +67,7 @@ app.delete('/todo', (req: Request, res: Response) => {
         if (!exists) {
             res.status(404);
             res.send(`\"id\" ${idToDelete} not found.`);
+            return;
         }
 
         getAllItems().then((items) => {

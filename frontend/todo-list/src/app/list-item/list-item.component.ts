@@ -55,7 +55,9 @@ export class ListItemComponent {
 
   submitEdit() {
     if (this.stagedInput != undefined) {
-      this.saved.emit(new Item(this.stagedInput, new Date(Date.now())));
+      let toEmit = new Item(this.stagedInput);
+      this.saved.emit(toEmit);
+      console.log(`Emitted: ${JSON.stringify(toEmit)}`);
     }
   }
 }

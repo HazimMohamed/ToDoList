@@ -28,8 +28,8 @@ export class AppComponent {
 
   deleteAllSelectedItems() {
     console.log(`Trying to delete ${this.selectedItems}`);
-    this.itemsService.deleteItem(this.selectedItems).then(() => {
-      return this.fetchItems()
+    this.itemsService.deleteItems(this.selectedItems).then((items) => {
+      this.items = items;
     });
   }
 
@@ -47,9 +47,9 @@ export class AppComponent {
 
   submitStagedItem(item: Item) {
     if (this.stagingItem?.content != undefined) {
-      this.itemsService.addItem(item.content).then(() => {
-        this.fetchItems();
+      this.itemsService.addItem(item.content).then((items) => {
         this.stagingItem = undefined;
+        this.items = items;
       });
     }
   }
