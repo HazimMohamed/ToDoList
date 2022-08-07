@@ -1,6 +1,6 @@
-let fs = require('fs')
+import fs from 'fs';
 import { Item } from './data-types'
-const TEST_DATA_PATH = './test-data/v1.json'
+const TEST_DATA_PATH = './test-db/v1.json'
 
 function shouldUseRealDatabase() : boolean {
 	let environmentFlag = process.env['CONNECT_TO_DB'];

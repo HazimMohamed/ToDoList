@@ -2,7 +2,7 @@
 frontend/todo-list/node_modules
 backend/node_modules
 backend/bin/*
-backend/test-data/*
+backend/test-db/*
 .idea
 .DS_STORE
 .angular

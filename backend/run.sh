@@ -6,4 +6,4 @@ if [ ! -d './bin' ]
 then
   mkdir bin
 fi
-node ./bin/main.js
+node --experimental-specifier-resolution=node ./bin/main.js
