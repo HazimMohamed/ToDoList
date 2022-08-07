@@ -1,10 +1,10 @@
 import {Item} from './data-types';
 import {json, Request, Response} from 'express';
 import {getAllItems} from './db-access';
-
-let express = require('express');
-let cors = require('cors');
-let itemsInterface = require('./db-access');
+import {validateItemNotMalformed, doesIdExist, validateDeleteRequestIsNotMalformed} from './data-validation';
+import express from 'express';
+import cors from 'cors';
+import * as itemsInterface from './db-access';
 
 let app = express();
 
@@ -20,61 +20,58 @@ app.get('/todo', (req: Request, res: Response) => {
     });
 });
 
-function validateNewItem(data: any): boolean {
-    return "id" in data && "content" in data;
-}
 
 app.post('/todo', (req: Request, res: Response) => {
     console.log(`Received post:`);
     console.log(req.body);
 
     let requestJson = req.body;
-    if (!validateNewItem(requestJson)) {
+    try {
+        validateItemNotMalformed(req.body);
+    } catch (e) {
         res.status(400);
-        res.send(`Got invalid content ${requestJson.toString()}.`);
+        res.send(`Got invalid content ${requestJson.toString()}: ${e.toString()}`);
         return;
     }
 
-    itemsInterface.addItem(requestJson).then((items: Item[]) => {
-        res.send(items);
-    })
+    doesIdExist(req.body.id).then((exists: boolean) => {
+        if (exists) {
+            res.status(409);
+            res.send(`\"id\" ${req.body.id} already exists. \"id\" values must be unique.`);
+            return;
+        }
+
+        itemsInterface.addItem(requestJson).then((items: Item[]) => {
+            res.send(items);
+        });
+    });
 });
 
-function validateDeleteRequest(data: any): boolean {
-    let idToDelete: any = data['id'];
-    let valid = idToDelete != undefined;
-    valid = valid && idToDelete instanceof String;
-    valid = valid && new RegExp('[0-9A-Za-z]+').test(idToDelete);
-    return valid;
-}
-
-function assertIdIsPresent(id: string, items: Item[]) : void {
-    if(!items.map((item) => item.id).includes(id)) {
-        throw `Id ${id} not found in items. Found ${items.map((item) => item.id)}`;
-    }
-}
-
 app.delete('/todo', (req: Request, res: Response) => {
-    if (!validateDeleteRequest(req.body)) {
+    try {
+        validateDeleteRequestIsNotMalformed(req.body);
+    } catch (e) {
         res.status(400);
-        res.send(`Got item invalid item ${req.body}`);
+        res.send(`Got item invalid item ${req.body.toString()}: ${e.toString()}`);
+        return;
     }
 
     let idToDelete = req.body['id'];
-    getAllItems().then((items) => {
-            try {
-                assertIdIsPresent(idToDelete, items);
-            } catch (e) {
-                res.status(404);
-                res.send(e);
-            }
+    doesIdExist(idToDelete).then((exists: boolean) => {
+        if (!exists) {
+            res.status(404);
+            res.send(`\"id\" ${idToDelete} not found.`);
+        }
+
+        getAllItems().then((items) => {
             itemsInterface.removeItem(idToDelete).then((items: Item[]) => {
+                res.setHeader('Content-Type', 'application/json')
                 res.send(JSON.stringify(items));
             });
-        }
-    );
+        });
+    });
 });
 
-app.listen(3000, () => {
-    console.log(`Listening on port 3000`);
-});
+// TODO: For some reason if I change this to a default export it doesn't work
+// with tests it would be nice to find out why.
+export { app };

@@ -2,8 +2,8 @@ let uuid = require('uuid');
 
 class Item {
   id: string;
-  createTime: Date;
-  content: string | undefined;
+  createTime: Date | undefined;
+  content: string;
 
   constructor(content: string, createTime: Date = undefined) {
     this.id = uuid.uuidv4();
