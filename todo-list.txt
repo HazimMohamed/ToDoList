@@ -1,0 +1,5 @@
+- Change the data model to have a parent to the list item (maybe called a
+collection).
+- Create a basic login/registration system for user to be the highest resource
+- Update the FE to display collections with an expandable/collapsable note
+-

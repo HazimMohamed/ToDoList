@@ -1,5 +1,5 @@
-import {getAllItems} from './db-access';
-import {Item} from './data-types';
+import {getAllItems} from '../clients/db-access';
+import {Item} from '../model/data-types';
 
 function assertObjectContainsField(obj: any, field: string) {
   if (!(field in obj)) {

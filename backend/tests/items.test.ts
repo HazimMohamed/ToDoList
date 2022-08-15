@@ -1,9 +1,9 @@
 import 'jest';
-import {app} from '../src/test-server';
+import {app} from '../src/server';
 import {item1, item2, item3} from './data';
 // @ts-ignore
 import supertest from 'supertest';
-import {Item} from '../src/data-types';
+import {Item} from '../src/model/data-types';
 
 let testApp: supertest.SuperTest<any>;
 

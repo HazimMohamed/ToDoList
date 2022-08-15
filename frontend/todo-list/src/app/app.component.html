@@ -1,33 +1,6 @@
-<div class="container">
-
-  <div class="header"><h2 class="mat-title">Hazim's ToDo List</h2></div>
-
-  <ng-container *ngFor="let item of items">
-    <list-item
-        class="list-item"
-        [item]="item"
-        (checked)="addToSelected($event)"
-        (unchecked)="removeFromSelected($event)">
-    </list-item>
-    <br/>
-  </ng-container>
-  <list-item
-      *ngIf="stagingItem"
-      class="list-item"
-      [item]="stagingItem"
-      [editable]="true"
-      (saved)="submitStagedItem($event)"
-  ></list-item>
-
-  <div class="button-container">
-    <button mat-button color="primary"
-            (click)="deleteAllSelectedItems()">
-      Delete all selected
-    </button>
-    <button mat-button color="primary"
-            (click)="createStagingItem()">
-      Add new item
-    </button>
-  </div>
-</div>
-
+<ng-container *ngIf="showLoginPage()">
+  <login-page></login-page>
+</ng-container>
+<ng-container *ngIf="!showLoginPage()">
+  <items-page></items-page>
+</ng-container>

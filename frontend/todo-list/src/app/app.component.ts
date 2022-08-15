@@ -1,56 +1,29 @@
-import { Component } from '@angular/core';
-import { Item, ItemsService } from '../services/items.service'
+import {Component, OnInit} from '@angular/core';
+import {LoginService} from '../services/login.service';
+import {ApiStatus} from '../model/apistatus';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
-  items: Item[] = [];
-  selectedItems: string[] = []
-  stagingItem: Item | undefined = undefined;
+export class AppComponent implements OnInit {
+  private isLoggedIn: ApiStatus;
 
-  constructor(private itemsService: ItemsService) {}
+  constructor(private loginService: LoginService) {
+    this.isLoggedIn = ApiStatus.NOT_STARTED;
+  }
 
   ngOnInit() {
-    this.fetchItems();
+    this.isLoggedIn = ApiStatus.PENDING;
+    this.loginService.isLoggedIn().then(() => {
+      this.isLoggedIn = ApiStatus.SUCCESS;
+    }).catch((reason => {
+      this.isLoggedIn = ApiStatus.FAILURE;
+    }));
   }
 
-  fetchItems() {
-    this.itemsService.getAllItems()
-        .then(items => this.items = items);
-  }
-
-  onItemSelect(id: string) {
-    this.selectedItems.push(id);
-  }
-
-  deleteAllSelectedItems() {
-    console.log(`Trying to delete ${this.selectedItems}`);
-    this.itemsService.deleteItems(this.selectedItems).then((items) => {
-      this.items = items;
-    });
-  }
-
-  addToSelected(id: string) {
-    this.selectedItems.push(id);
-  }
-
-  removeFromSelected(id: string) {
-    this.selectedItems = this.selectedItems.filter(value => value != id);
-  }
-
-  createStagingItem() {
-    this.stagingItem = new Item('', new Date(Date.now()));
-  }
-
-  submitStagedItem(item: Item) {
-    if (this.stagingItem?.content != undefined) {
-      this.itemsService.addItem(item.content).then((items) => {
-        this.stagingItem = undefined;
-        this.items = items;
-      });
-    }
+  showLoginPage(): boolean {
+    return this.isLoggedIn == ApiStatus.FAILURE;
   }
 }

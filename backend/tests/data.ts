@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { Item } from '../src/data-types';
+import { Item } from '../src/model/data-types';
 
 let item1: Item = {
   'id': uuid().toString(),

@@ -11,11 +11,13 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {MatInputModule} from '@angular/material/input';
+import { ItemsPageComponent } from './items-page/items-page.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ListItemComponent
+    ListItemComponent,
+    ItemsPageComponent
   ],
   imports: [
     BrowserModule,

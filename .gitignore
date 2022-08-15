@@ -6,3 +6,4 @@ backend/test-db/*
 .idea
 .DS_STORE
 .angular
+/backend/key.secret
