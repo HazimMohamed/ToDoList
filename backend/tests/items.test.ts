@@ -1,114 +1,132 @@
 import 'jest';
 import {app} from '../src/server';
-import {item1, item2, item3} from './data';
 // @ts-ignore
 import supertest from 'supertest';
-import {Item} from '../src/model/data-types';
+import {Item, ItemCollection} from '../src/model/data-types';
+import {item1, item2} from './data';
 
 let testApp: supertest.SuperTest<any>;
+let collectionCreationRegistry: string[];
 
-// Used to clean up after tests.
-let writtenIds: Array<string> = [];
+function errorMessage(methodName: string, response: supertest.Response) {
+  return `Failed to ${methodName}. Status: ${response.status}. Message ${response.body}`;
+}
+
+async function createCollection(items: Item[] = []): Promise<ItemCollection> {
+  let response: supertest.Response = await testApp.post('/collection')
+      .set('Content-Type', 'application/json')
+      .send(JSON.stringify({name: 'Test Collection', items: items}));
+
+  if (response.status == 200) {
+    let collection: ItemCollection = response.body;
+    collectionCreationRegistry.push(collection.id);
+    return collection;
+  } else {
+    throw errorMessage('create test collection', response);
+  }
+}
+
+async function deleteCollections(ids: string[]): Promise<void> {
+  let response: supertest.Response = await testApp.delete('/collection')
+      .set('Content-Type', 'application/json')
+      .send(JSON.stringify({ids: ids}));
+
+  if (response.status == 200) {
+    collectionCreationRegistry.filter((collectionId: string) => { return ids.indexOf(collectionId) != -1 });
+  } else {
+    throw errorMessage('delete test collection', response);
+  }
+}
+
+async function getAllCollection(): Promise<ItemCollection[]> {
+  let response: supertest.Response = await testApp.get('/collection')
+      .set('Content-Type', 'application/json')
+      .send();
+
+  if (response.status == 200) {
+    return response.body;
+  } else {
+    throw errorMessage('get all collections', response);
+  }
+}
+
+async function updateCollection(updatedCollection: ItemCollection): Promise<ItemCollection> {
+  let response: supertest.Response = await testApp.patch('/collection')
+      .set('Content-Type', 'application/json')
+      .send(JSON.stringify(updatedCollection));
+
+  if (response.status == 200) {
+    return response.body;
+  } else {
+    throw errorMessage('update collection', response);
+  }
+}
+
+async function cleanUp(): Promise<void> {
+  await deleteCollections(collectionCreationRegistry);
+}
 
 beforeAll(() => {
-  testApp = supertest(app);
+  testApp = supertest('127.0.0.1:3000');
+  collectionCreationRegistry = [];
 });
 
-beforeEach(() => {
-  writtenIds = [];
+afterAll(async () => {
+  await cleanUp();
 });
 
-afterEach(async () => {
-  for (let id of writtenIds) {
-    try {
-      await deleteItem(id);
-    } catch (e) {
-      console.log(`Failed to clean up item with \"id\" ${id}. Error: ${e.toString()}`);
-    }
-  }
-})
+test('can create collection and read them back', async () => {
+  let createdCollection = await createCollection();
 
-async function writeItem(item: any, expectedStatusCode: number = 200) {
-  await testApp.post('/todo')
-      .set('Content-Type', 'application/json')
-      .send(JSON.stringify(item))
-      .expect(expectedStatusCode);
+  let response: ItemCollection[] = await getAllCollection();
 
-  if (expectedStatusCode == 200) {
-    writtenIds.push(item['id']);
-  }
-}
-
-async function deleteItem(toDelete: string | object, expectedStatusCode: number = 200) {
-  let deleteRequest = typeof toDelete === 'string' ? {'id': toDelete } : toDelete;
-
-  await testApp.delete('/todo')
-      .set('Content-Type', 'application/json')
-      .send(JSON.stringify(deleteRequest))
-      .expect(expectedStatusCode);
-
-  if (expectedStatusCode == 200 && ('id' in deleteRequest)) {
-    writtenIds = writtenIds.filter((writtenId: string) => writtenId != (deleteRequest as {'id' : string; }) ['id']);
-  }
-}
-
-async function getAllItems() {
-  return await testApp.get('/todo').expect(200);
-}
-
-test('can write items and read them back', async () => {
-  await writeItem(item1);
-  await writeItem(item2);
-  await writeItem(item3);
-
-  let response: supertest.Response = await getAllItems();
-
-  expect(doesResponseContainItem(response.body, item1)).toBeTruthy();
-  expect(doesResponseContainItem(response.body, item2)).toBeTruthy();
-  expect(doesResponseContainItem(response.body, item3)).toBeTruthy();
+  expect(doesResponseContainItem(response, createdCollection)).toBeTruthy();
 });
 
-test('can write items and delete', async () => {
-  await writeItem(item1);
-  await writeItem(item2);
-  await deleteItem(item2.id);
+test('can write collection and delete them', async () => {
+  let createdCollection = await createCollection();
+  await deleteCollections([createdCollection.id]);
 
-  let response: supertest.Response = await getAllItems();
+  let response: ItemCollection[] = await getAllCollection();
 
-  expect(doesResponseContainItem(response.body, item1)).toBeTruthy();
-  expect(doesResponseContainItem(response.body, item2)).toBeFalsy();
+  expect(doesResponseContainItem(response, createdCollection)).toBeFalsy();
 });
 
-test('malformed create item returns 400', async () => {
-  await writeItem({'id': 1234}, 400);
+test('can update collection to include more items', async () => {
+  let createdCollection = await createCollection();
+  createdCollection.items.push({
+    id: 'foo bar',
+    content: 'Some new content'
+  });
+  let updatedCollection = createdCollection;
+
+  await updateCollection(updatedCollection);
+  let response = await getAllCollection();
+
+  expect(doesResponseContainItem(response, updatedCollection)).toBeTruthy();
 });
 
-test('duplicate item return 409', async () => {
-  await writeItem(item1);
-  await writeItem(item1, 409);
-});
+test('can update collection to include less items', async () => {
+  let createdCollection = await createCollection([item1, item2]);
+  createdCollection.items = [item2]
+  let updatedCollection = createdCollection;
 
-test('malformed delete request returns 400', async () => {
-  await deleteItem({'idd': '12345'}, 400);
-});
+  await updateCollection(updatedCollection);
+  let response = await getAllCollection();
 
-test('delete for not existent item returns 404', async () => {
-  await deleteItem(item1.id, 404);
+  expect(doesResponseContainItem(response, updatedCollection)).toBeTruthy();
 });
 
 // Ignores createTime
-function areItemsEqual(expected: Item, actual: Item) {
+function areCollectionsEqual(expected: ItemCollection, actual: ItemCollection) {
   for (let field in expected) {
-    if (field == 'createTime') {
-      continue;
-    }
     if (!(field in actual)) {
       return false;
     }
-    return expected[field as keyof Item] === actual[field as keyof Item];
+    return expected[field as keyof ItemCollection] === actual[field as keyof ItemCollection];
   }
 }
 
-function doesResponseContainItem(response: Item[], item: Item): boolean {
-  return response.filter((responseItem: Item) => areItemsEqual(item, responseItem)).length > 0;
+function doesResponseContainItem(response: ItemCollection[], item: ItemCollection): boolean {
+  return response.filter((responseItem: ItemCollection) => areCollectionsEqual(responseItem, item)).length > 0;
 }

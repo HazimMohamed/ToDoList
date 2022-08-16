@@ -25,4 +25,4 @@ then
 fi
 
 npx tsc
-node --experimental-specifier-resolution=node ./bin/main.js 2> /dev/null
+node --experimental-specifier-resolution=node ./bin/main.js

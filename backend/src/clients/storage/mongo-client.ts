@@ -1,6 +1,6 @@
 import {MongoClient} from 'mongodb';
 
-type MongoCallback<T> = (MongoClient) => Promise<T> | T;
+type MongoCallback<T> = (mongo: MongoClient) => Promise<T> | T;
 
 export class PIMongoClient {
   private static MONGO_URI = `mongodb+srv://todo-list-user:${process.env['MONGO_PASSWORD']}@startgazerv2.hojhz.mongodb.net`;

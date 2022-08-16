@@ -4,19 +4,16 @@ import { Item } from '../src/model/data-types';
 let item1: Item = {
   'id': uuid().toString(),
   'content': 'Long live the king!',
-  'createTime': undefined
 }
 
 let item2: Item = {
   'id': uuid().toString(),
   'content': 'The old king is dead.',
-  'createTime': undefined
 }
 
 let item3: Item = {
   'id': uuid().toString(),
   'content': 'long live the new king!',
-  'createTime': undefined
 }
 
 export {item1, item2, item3}

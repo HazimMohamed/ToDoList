@@ -1,0 +1,21 @@
+b {
+  background-color: lightgray;
+}
+
+.container {
+  display:flex;
+  flex-direction: column;
+}
+.header {
+  margin-left: 3em;
+}
+.list-item {
+  margin-left: 2em;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: row;
+  flex:  1;
+  justify-content: center;
+}

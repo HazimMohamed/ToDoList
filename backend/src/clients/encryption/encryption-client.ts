@@ -20,6 +20,4 @@ function decrypt(data: Buffer): Buffer {
   return Buffer.from('');
 }
 
-encrypt(Buffer.from('This is some data'));
-
 export {encrypt, decrypt};

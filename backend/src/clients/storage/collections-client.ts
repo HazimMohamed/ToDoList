@@ -13,7 +13,7 @@ function toCollection(data: any): ItemCollection {
   return {
     id: data._id,
     name: data.name,
-    items: data.items
+    items: data.items ?? []
   }
 }
 
@@ -35,10 +35,10 @@ function createCollection(name: string): Promise<ItemCollection> {
   });
 }
 
-function updateCollection(id: string, updated: ItemCollection): Promise<ItemCollection> {
+function updateCollection(updated: ItemCollection): Promise<ItemCollection> {
   return collectionHandle().then((handle: Collection<Document>) => {
-    handle.
-  });
+    return handle.replaceOne({ _id: new ObjectId(updated.id) }, updated)
+  }).then(() => getCollection(updated.id));
 }
 
 function getAllCollections(): Promise<ItemCollection[]> {
@@ -49,4 +49,13 @@ function getAllCollections(): Promise<ItemCollection[]> {
   });
 }
 
-export {getCollection, getAllCollections, createCollection, updateCollection}
+function removeCollections(ids: string[]): Promise<void> {
+  let mongoTypeIds: ObjectId[] = ids.map((idStr: string) => new ObjectId(idStr));
+  return collectionHandle().then((handle: Collection<Document>) => {
+    return handle.deleteMany({
+      _id: { $in: mongoTypeIds }
+    }).then(()=>{});
+  });
+}
+
+export {getCollection, getAllCollections, createCollection, updateCollection, removeCollections}
